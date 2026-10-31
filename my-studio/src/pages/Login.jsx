@@ -44,7 +44,7 @@ export default function Login() {
                 <LockKeyhole size={24} />
               </div>
               <div className="text-sm uppercase tracking-[0.23em] text-emerald-300">Secure access</div>
-              <h1 className="mt-4 text-4xl font-black text-white">HM Admin Portal</h1>
+              <h1 className="mt-4 text-4xl font-black text-white">Taqveem Ulhaq Admin Portal</h1>
             </div>
             <p className="max-w-sm text-sm leading-7 text-slate-300">
               Manage orders, bookings, customer leads, and AI-assisted marketing and support messaging from one place.

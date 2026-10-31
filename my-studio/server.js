@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, "dist");
 const dataDir = path.join(__dirname, "data");
 const appConfig = {
-  brandName: "HM Studios",
+  brandName: "Taqveem Ulhaq",
   supportEmail: process.env.SUPPORT_EMAIL || "taqveemhacker@gmail.com",
   backupEmail: process.env.BACKUP_EMAIL || "taqveemulhaq97@gmail.com",
   whatsappNumber: process.env.WHATSAPP_NUMBER || "923018570942",
@@ -44,7 +44,7 @@ const fallbackReply = (prompt) => {
   }
 
   if (lower.includes("reply") || lower.includes("whatsapp") || lower.includes("message")) {
-    return "Hi! Thanks for your interest in HM Studios. I’ve confirmed your request and will send secure payment details, next steps, and delivery instructions. If needed, you may also book a private consultation for deeper technical guidance.";
+    return "Hi! Thanks for your interest in Taqveem Ulhaq. I’ve confirmed your request and will send secure payment details, next steps, and delivery instructions. If needed, you may also book a private consultation for deeper technical guidance.";
   }
 
   if (lower.includes("support") || lower.includes("issue") || lower.includes("summary")) {
@@ -94,7 +94,7 @@ const sendAdminNotification = async ({ subject, text, html }) => {
   try {
     const to = [appConfig.supportEmail, appConfig.backupEmail].filter(Boolean).join(", ");
     await emailTransporter.sendMail({
-      from: `HM Studios <${appConfig.gmailUser}>`,
+      from: `Taqveem Ulhaq <${appConfig.gmailUser}>`,
       to,
       subject,
       text,
@@ -341,7 +341,7 @@ app.post("/api/admin/leads", requireAuth, async (req, res) => {
   ).run(id, String(name), String(email), String(source), String(note || ""), "new");
 
   await sendAdminNotification({
-    subject: `New HM Studios lead: ${name}`,
+    subject: `New Taqveem Ulhaq lead: ${name}`,
     text: `New lead from ${source}: ${name} (${email})\nNotes: ${note || "No extra notes"}`,
   });
 
@@ -366,7 +366,7 @@ app.post("/api/ai/generate", requireAuth, async (req, res) => {
         {
           role: "system",
           content:
-            "You are the AI assistant for HM Studios. Write concise, professional, conversion-focused replies for digital forensics, Android recovery, support, and customer onboarding. Keep answers practical and clear.",
+            "You are the AI assistant for Taqveem Ulhaq. Write concise, professional, conversion-focused replies for digital forensics, Android recovery, support, and customer onboarding. Keep answers practical and clear.",
         },
         { role: "user", content: prompt },
       ],
@@ -396,7 +396,7 @@ app.post("/api/orders", async (req, res) => {
   ).run(id, String(plan), String(email), String(paymentMethod || "EasyPaisa"), String(transactionId), String(amount || "$0"));
 
   await sendAdminNotification({
-    subject: `New HM Studios order: ${plan}`,
+    subject: `New Taqveem Ulhaq order: ${plan}`,
     text: `Customer: ${email}\nPlan: ${plan}\nPayment method: ${paymentMethod || "EasyPaisa"}\nTransaction ID: ${transactionId}\nAmount: ${amount || "$0"}`,
   });
 
@@ -415,7 +415,7 @@ app.post("/api/consultations", async (req, res) => {
   ).run(id, String(name), String(email), String(day), String(time), String(transactionId));
 
   await sendAdminNotification({
-    subject: `New HM Studios consultation: ${name}`,
+    subject: `New Taqveem Ulhaq consultation: ${name}`,
     text: `Consultation request from ${name} (${email})\nPreferred day: ${day}\nPreferred time: ${time}\nTransaction ID: ${transactionId}`,
   });
 
@@ -437,7 +437,7 @@ app.post("/api/contact/send", async (req, res) => {
     return res.status(500).json({ error: result.reason || "Unable to send email" });
   }
 
-  res.json({ success: true, message: "Message delivered to HM Studios" });
+  res.json({ success: true, message: "Message delivered to Taqveem Ulhaq" });
 });
 
 if (fs.existsSync(distDir)) {
@@ -449,5 +449,5 @@ if (fs.existsSync(distDir)) {
 }
 
 app.listen(port, () => {
-  console.log(`HM Studios API running on http://localhost:${port}`);
+  console.log(`Taqveem Ulhaq API running on http://localhost:${port}`);
 });

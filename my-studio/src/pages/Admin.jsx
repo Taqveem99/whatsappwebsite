@@ -44,7 +44,7 @@ function buildAiReply(prompt) {
   }
 
   if (lower.includes("reply") || lower.includes("whatsapp") || lower.includes("message")) {
-    return "Hi! Thanks for your interest in HM Studios. I have confirmed your package request and will send the next steps, payment details, and delivery instructions in the next message. You can also book a private consultation if you need guidance.";
+    return "Hi! Thanks for your interest in Taqveem Ulhaq. I have confirmed your package request and will send the next steps, payment details, and delivery instructions in the next message. You can also book a private consultation if you need guidance.";
   }
 
   if (lower.includes("support") || lower.includes("issue") || lower.includes("summary")) {
@@ -175,7 +175,7 @@ export default function Admin() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-[0.25em] text-slate-400">Admin</div>
-              <div className="font-bold text-white">HM Control</div>
+              <div className="font-bold text-white">Taqveem Control</div>
             </div>
           </div>
 

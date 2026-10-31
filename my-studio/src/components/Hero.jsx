@@ -31,13 +31,12 @@ export default function Hero() {
             </div>
 
             <h1 className="max-w-xl text-balance text-4xl font-black tracking-tight text-white md:text-6xl">
-              Haris Awan — Founder & Sole Architect at HM Studios
+              Taqveem Ulhaq — Founder & Digital Recovery Architect
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              Independent digital forensics, data recovery, and cybersecurity engineering. HM DeepScan v1.0
-              is built for Android & WhatsApp evidence recovery with offline access, deep carving, and private
-              forensic workflows.
+              Independent digital forensics, data recovery, and cybersecurity engineering. Taqveem Ulhaq delivers
+              premium Android & WhatsApp recovery with offline access, deep carving, and private forensic workflows.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-4">

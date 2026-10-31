@@ -11,7 +11,7 @@ export default function Navbar() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/40">
             <ShieldCheck size={18} />
           </span>
-          HM Studios
+          Taqveem Ulhaq
         </Link>
 
         <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">

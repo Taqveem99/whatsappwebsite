@@ -13,7 +13,7 @@ const faqs = [
   { q: "What is HM DeepScan v1.0?", a: "HM DeepScan v1.0 is a Windows 10/11 desktop forensic recovery suite built for Android and WhatsApp media/data recovery workflows." },
   { q: "Does it work offline?", a: "Yes. The workflow is designed to remain fully offline, keeping sensitive evidence and media on-device without cloud handoff." },
   { q: "Does it support deleted WhatsApp recovery?", a: "Yes. The suite includes deep recovery logic with WhatsApp Crypt14 decryption support for protected databases and deleted media." },
-  { q: "Can I get private support?", a: "Yes. You can book a private 1-on-1 consultation with Haris Awan for complex recovery or cybersecurity questions." },
+  { q: "Can I get private support?", a: "Yes. You can book a private 1-on-1 consultation with Taqveem Ulhaq for complex recovery or cybersecurity questions." },
 ];
 
 export default function Home() {
@@ -25,7 +25,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-6 py-8 md:py-12">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="glass-card rounded-3xl p-8">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">Why people choose HM</p>
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">Why people choose Taqveem Ulhaq</p>
             <h3 className="text-3xl font-bold text-white">Evidence-first recovery for real cases.</h3>
             <ul className="mt-8 space-y-4 text-slate-300">
               {[
@@ -112,7 +112,7 @@ export default function Home() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Official channels</p>
-              <h3 className="text-3xl font-bold text-white">Connect directly with HM Studios.</h3>
+              <h3 className="text-3xl font-bold text-white">Connect directly with Taqveem Ulhaq.</h3>
             </div>
             <div className="flex flex-wrap gap-3">
               <a href="https://wa.me/923018570942" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400 hover:text-slate-950">

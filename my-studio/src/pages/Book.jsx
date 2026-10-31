@@ -8,7 +8,7 @@ export default function Book() {
   const submit = (e) => {
     e.preventDefault();
     const msg = [
-      "Private HM Studios consultation booking",
+      "Private Taqveem Ulhaq consultation booking",
       `Name: ${form.name}`,
       `Email: ${form.email}`,
       `Preferred day: ${form.day}`,
@@ -24,7 +24,7 @@ export default function Book() {
     <main className="mx-auto max-w-2xl px-6 pb-24 pt-12 md:pt-16">
       <div className="mb-8 text-center">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Private consultation</p>
-        <h1 className="text-4xl font-black text-white md:text-5xl">Book a 1-on-1 session with Haris Awan.</h1>
+        <h1 className="text-4xl font-black text-white md:text-5xl">Book a 1-on-1 session with Taqveem Ulhaq.</h1>
         <p className="mx-auto mt-4 max-w-xl text-slate-400">
           30-minute weekend consultation for data recovery, digital forensics, and cybersecurity guidance.
           Fee: PKR 3,000 or $11 USDT.

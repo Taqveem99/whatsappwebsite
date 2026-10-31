@@ -16,7 +16,7 @@ export default function Store() {
   const submit = (e) => {
     e.preventDefault();
     const msg = [
-      "New HM Studios order",
+      "New Taqveem Ulhaq order",
       `Plan: ${selected.name}`,
       `Price: ${currentPrice}`,
       `Email: ${form.email}`,
