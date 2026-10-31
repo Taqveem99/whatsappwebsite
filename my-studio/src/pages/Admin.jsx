@@ -16,18 +16,15 @@ import {
   Wand2,
 } from "lucide-react";
 
-const stats = [
-  { label: "Revenue", value: "$18.4K", change: "+12.8%", tone: "emerald" },
-  { label: "Orders", value: "312", change: "+19.3%", tone: "cyan" },
-  { label: "Consultations", value: "48", change: "+8.4%", tone: "violet" },
-  { label: "Recovery Cases", value: "116", change: "+24.6%", tone: "amber" },
+const defaultStats = [
+  { label: "Revenue", value: "$0", change: "+0%", tone: "emerald" },
+  { label: "Orders", value: "0", change: "+0%", tone: "cyan" },
+  { label: "Consultations", value: "0", change: "+0%", tone: "violet" },
+  { label: "Leads", value: "0", change: "+0%", tone: "amber" },
 ];
 
-const leads = [
-  { name: "Sara Ali", service: "Deep Recovery", status: "Follow-up", value: "$59" },
-  { name: "Omer Khan", service: "Enterprise", status: "Paid", value: "$149" },
-  { name: "Hina Noor", service: "Consultation", status: "Booked", value: "$11" },
-  { name: "Ayesha W", service: "Standard", status: "Review", value: "$9" },
+const defaultLeads = [
+  { name: "No leads yet", service: "Waiting for intake", status: "New", value: "$0" },
 ];
 
 const templates = [
@@ -73,13 +70,62 @@ export default function Admin() {
   const [aiResult, setAiResult] = useState(buildAiReply(prompt));
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiStatus, setApiStatus] = useState("checking");
+  const [stats, setStats] = useState(defaultStats);
+  const [leads, setLeads] = useState(defaultLeads);
+  const [orders, setOrders] = useState([]);
+  const [consultations, setConsultations] = useState([]);
+
+  const token = localStorage.getItem("hm-admin-token");
 
   useEffect(() => {
-    fetch("/api/health")
-      .then((res) => res.json())
-      .then((data) => setApiStatus(data.provider || "fallback"))
-      .catch(() => setApiStatus("fallback"));
-  }, []);
+    const fetchDashboard = async () => {
+      try {
+        const [healthRes, summaryRes, leadsRes, ordersRes, consultRes] = await Promise.all([
+          fetch("/api/health"),
+          fetch("/api/admin/summary", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/admin/leads", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/admin/orders", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/admin/consultations", { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+
+        const health = await healthRes.json();
+        setApiStatus(health.provider || "fallback");
+
+        if (summaryRes.ok) {
+          const summary = await summaryRes.json();
+          if (summary.stats) setStats(summary.stats);
+        }
+
+        if (leadsRes.ok) {
+          const payload = await leadsRes.json();
+          if (payload.leads?.length) {
+            setLeads(payload.leads.map((lead) => ({
+              name: lead.name,
+              service: lead.source,
+              status: lead.status,
+              value: `$${Number(lead.note || 0) || 0}`,
+            })));
+          }
+        }
+
+        if (ordersRes.ok) {
+          const payload = await ordersRes.json();
+          setOrders(payload.orders || []);
+        }
+
+        if (consultRes.ok) {
+          const payload = await consultRes.json();
+          setConsultations(payload.consultations || []);
+        }
+      } catch (error) {
+        setApiStatus("fallback");
+      }
+    };
+
+    if (token) {
+      fetchDashboard();
+    }
+  }, [token]);
 
   const sidebarItems = useMemo(
     () => [
@@ -100,7 +146,10 @@ export default function Admin() {
     try {
       const response = await fetch("/api/ai/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ prompt }),
       });
 
@@ -111,6 +160,20 @@ export default function Admin() {
       setAiResult(buildAiReply(prompt));
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      // ignore logout failure
+    } finally {
+      localStorage.removeItem("hm-admin-token");
+      window.location.href = "/login";
     }
   };
 
@@ -167,8 +230,8 @@ export default function Admin() {
                 <button type="button" className="rounded-full border border-slate-700 bg-slate-900/70 p-2.5 text-slate-300">
                   <Bell size={18} />
                 </button>
-                <button type="button" className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950">
-                  Launch AI
+                <button type="button" onClick={handleLogout} className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200">
+                  Logout
                 </button>
               </div>
             </div>
@@ -222,13 +285,23 @@ export default function Admin() {
               </div>
 
               <div className="space-y-4">
-                {activity.map(({ label, detail, time }) => (
-                  <div key={label} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                {orders.slice(0, 3).map((order) => (
+                  <div key={order.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-semibold text-white">{label}</div>
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{time}</div>
+                      <div className="text-sm font-semibold text-white">{order.plan}</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{order.status}</div>
                     </div>
-                    <div className="mt-1 text-sm text-slate-400">{detail}</div>
+                    <div className="mt-1 text-sm text-slate-400">{order.email} · {order.amount}</div>
+                  </div>
+                ))}
+
+                {consultations.slice(0, 2).map((consultation) => (
+                  <div key={consultation.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-white">Consultation</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{consultation.status}</div>
+                    </div>
+                    <div className="mt-1 text-sm text-slate-400">{consultation.name} · {consultation.preferred_day} {consultation.preferred_time}</div>
                   </div>
                 ))}
               </div>

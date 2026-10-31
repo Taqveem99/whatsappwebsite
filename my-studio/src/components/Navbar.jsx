@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { ShieldCheck, Sparkles } from "lucide-react";
 
 export default function Navbar() {
+  const hasSession = Boolean(localStorage.getItem("hm-admin-token"));
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -16,7 +18,7 @@ export default function Navbar() {
           <Link to="/" className="transition hover:text-white">Home</Link>
           <Link to="/store" className="transition hover:text-white">Store</Link>
           <Link to="/book" className="transition hover:text-white">Consultation</Link>
-          <Link to="/admin" className="transition hover:text-white">Admin</Link>
+          <Link to={hasSession ? "/admin" : "/login"} className="transition hover:text-white">Admin</Link>
           <a href="https://wa.me/923018570942" target="_blank" rel="noreferrer" className="transition hover:text-white">
             WhatsApp
           </a>
@@ -24,10 +26,10 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/admin"
+            to={hasSession ? "/admin" : "/login"}
             className="hidden rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-white transition hover:border-slate-500 md:inline-flex"
           >
-            Admin Portal
+            {hasSession ? "Admin Portal" : "Login"}
           </Link>
           <Link
             to="/store"
