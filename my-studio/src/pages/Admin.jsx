@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   BarChart3,
   Bell,
@@ -17,14 +17,14 @@ import {
 } from "lucide-react";
 
 const defaultStats = [
-  { label: "Revenue", value: "$0", change: "+0%", tone: "emerald" },
+  { label: "Revenue", value: "", change: "+0%", tone: "emerald" },
   { label: "Orders", value: "0", change: "+0%", tone: "cyan" },
   { label: "Consultations", value: "0", change: "+0%", tone: "violet" },
   { label: "Leads", value: "0", change: "+0%", tone: "amber" },
 ];
 
 const defaultLeads = [
-  { name: "No leads yet", service: "Waiting for intake", status: "New", value: "$0" },
+  { name: "No leads yet", service: "Waiting for intake", status: "new", value: "" },
 ];
 
 const templates = [
@@ -32,13 +32,6 @@ const templates = [
   "Write a premium product description for HM DeepScan",
   "Summarize the key support issues in this week",
   "Generate a short promo message for the 90-day recovery package",
-];
-
-const activity = [
-  { label: "Order confirmed", detail: "User bought Deep Sector Extraction", time: "8 min ago" },
-  { label: "Consultation booked", detail: "Saturday - 6:00 PM slot", time: "14 min ago" },
-  { label: "Support message", detail: "Customer asked about Crypt14 recovery", time: "31 min ago" },
-  { label: "New lead", detail: "Instagram inquiry: Android data recovery", time: "1 hr ago" },
 ];
 
 const chartBars = [46, 62, 58, 82, 70, 94, 88, 100, 92, 86, 98, 75];
@@ -51,7 +44,7 @@ function buildAiReply(prompt) {
   }
 
   if (lower.includes("reply") || lower.includes("whatsapp") || lower.includes("message")) {
-    return "Hi! Thanks for your interest in HM Studios. I’ve confirmed your package request and will send the next steps, payment details, and delivery instructions in the next message. You can also book a private consultation if you need guidance.";
+    return "Hi! Thanks for your interest in HM Studios. I have confirmed your package request and will send the next steps, payment details, and delivery instructions in the next message. You can also book a private consultation if you need guidance.";
   }
 
   if (lower.includes("support") || lower.includes("issue") || lower.includes("summary")) {
@@ -62,60 +55,59 @@ function buildAiReply(prompt) {
     return "Launch a limited-time promotion for the Deep Sector Recovery plan and highlight its advanced WhatsApp decryption, deep carve capabilities, and VIP consultation access. Emphasize privacy, speed, and technical expertise.";
   }
 
-  return "Here’s an AI-generated action plan: review the latest customer intake, confirm package viability, respond in the next 15 minutes, and add follow-up reminders for consultations and support tickets.";
+  return "Here is an AI-generated action plan: review the latest customer intake, confirm package viability, respond in the next 15 minutes, and add follow-up reminders for consultations and support tickets.";
 }
 
 export default function Admin() {
   const [prompt, setPrompt] = useState("Write a short marketing message for the Deep Sector Recovery plan.");
-  const [aiResult, setAiResult] = useState(buildAiReply(prompt));
+  const [aiResult, setAiResult] = useState(buildAiReply("Write a short marketing message for the Deep Sector Recovery plan."));
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiStatus, setApiStatus] = useState("checking");
   const [stats, setStats] = useState(defaultStats);
   const [leads, setLeads] = useState(defaultLeads);
   const [orders, setOrders] = useState([]);
   const [consultations, setConsultations] = useState([]);
+  const [pipeline, setPipeline] = useState([
+    { stage: "Lead capture", count: 18, amount: ".4K" },
+    { stage: "Qualification", count: 11, amount: ".7K" },
+    { stage: "Consultation", count: 7, amount: ".3K" },
+    { stage: "Closed", count: 4, amount: ".2K" },
+  ]);
+  const [emailReady, setEmailReady] = useState(false);
 
   const token = localStorage.getItem("hm-admin-token");
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const [healthRes, summaryRes, leadsRes, ordersRes, consultRes] = await Promise.all([
+        const [healthRes, overviewRes] = await Promise.all([
           fetch("/api/health"),
-          fetch("/api/admin/summary", { headers: { Authorization: `Bearer ${token}` } }),
-          fetch("/api/admin/leads", { headers: { Authorization: `Bearer ${token}` } }),
-          fetch("/api/admin/orders", { headers: { Authorization: `Bearer ${token}` } }),
-          fetch("/api/admin/consultations", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/admin/overview", {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }),
         ]);
 
         const health = await healthRes.json();
         setApiStatus(health.provider || "fallback");
+        setEmailReady(Boolean(health.emailReady));
 
-        if (summaryRes.ok) {
-          const summary = await summaryRes.json();
-          if (summary.stats) setStats(summary.stats);
-        }
-
-        if (leadsRes.ok) {
-          const payload = await leadsRes.json();
-          if (payload.leads?.length) {
+        if (overviewRes.ok) {
+          const payload = await overviewRes.json();
+          if (payload.stats) setStats(payload.stats);
+          if (payload.pipeline) setPipeline(payload.pipeline);
+          if (payload.leads && payload.leads.length) {
             setLeads(payload.leads.map((lead) => ({
               name: lead.name,
               service: lead.source,
               status: lead.status,
-              value: `$${Number(lead.note || 0) || 0}`,
+              value: lead.note ? "$" + lead.note : "",
             })));
           }
-        }
-
-        if (ordersRes.ok) {
-          const payload = await ordersRes.json();
-          setOrders(payload.orders || []);
-        }
-
-        if (consultRes.ok) {
-          const payload = await consultRes.json();
-          setConsultations(payload.consultations || []);
+          if (payload.orders) setOrders(payload.orders);
+          if (payload.consultations) setConsultations(payload.consultations);
+          if (payload.emailReady !== undefined) setEmailReady(Boolean(payload.emailReady));
         }
       } catch (error) {
         setApiStatus("fallback");
@@ -127,18 +119,15 @@ export default function Admin() {
     }
   }, [token]);
 
-  const sidebarItems = useMemo(
-    () => [
-      { label: "Overview", icon: LayoutDashboard, active: true },
-      { label: "Customers", icon: Users },
-      { label: "Orders", icon: Package },
-      { label: "AI Copilot", icon: BrainCircuit },
-      { label: "Inbox", icon: MessageSquareText },
-      { label: "Reports", icon: BarChart3 },
-      { label: "Settings", icon: Settings },
-    ],
-    [],
-  );
+  const sidebarItems = [
+    { label: "Overview", icon: LayoutDashboard, active: true },
+    { label: "Customers", icon: Users },
+    { label: "Orders", icon: Package },
+    { label: "AI Copilot", icon: BrainCircuit },
+    { label: "Inbox", icon: MessageSquareText },
+    { label: "Reports", icon: BarChart3 },
+    { label: "Settings", icon: Settings },
+  ];
 
   const handleAiGenerate = async () => {
     setIsGenerating(true);
@@ -148,14 +137,13 @@ export default function Admin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: "Bearer " + token,
         },
         body: JSON.stringify({ prompt }),
       });
 
       const data = await response.json();
-      const text = data.text || buildAiReply(prompt);
-      setAiResult(text);
+      setAiResult(data.text || buildAiReply(prompt));
     } catch (error) {
       setAiResult(buildAiReply(prompt));
     } finally {
@@ -167,7 +155,7 @@ export default function Admin() {
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: "Bearer " + token },
       });
     } catch (error) {
       // ignore logout failure
@@ -196,9 +184,7 @@ export default function Admin() {
               <button
                 key={label}
                 type="button"
-                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition ${
-                  active ? "bg-emerald-500/12 text-emerald-200 ring-1 ring-emerald-400/30" : "text-slate-300 hover:bg-slate-800/60"
-                }`}
+                className={"flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition " + (active ? "bg-emerald-500/12 text-emerald-200 ring-1 ring-emerald-400/30" : "text-slate-300 hover:bg-slate-800/60")}
               >
                 <Icon size={17} />
                 {label}
@@ -211,8 +197,8 @@ export default function Admin() {
               <Sparkles size={16} className="text-emerald-300" />
               AI credits
             </div>
-            <div className="text-3xl font-black text-white">1,280</div>
-            <div className="mt-2 text-xs text-slate-400">Available this month</div>
+            <div className="text-3xl font-black text-white">{emailReady ? "Unlimited" : "1,280"}</div>
+            <div className="mt-2 text-xs text-slate-400">{emailReady ? "Email & AI ready" : "Available this month"}</div>
           </div>
         </aside>
 
@@ -243,11 +229,7 @@ export default function Admin() {
                 <div className="text-sm text-slate-400">{label}</div>
                 <div className="mt-5 flex items-end justify-between gap-4">
                   <div className="text-3xl font-black text-white">{value}</div>
-                  <div className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                    tone === "emerald" ? "bg-emerald-500/10 text-emerald-200" :
-                    tone === "cyan" ? "bg-cyan-500/10 text-cyan-200" :
-                    tone === "violet" ? "bg-violet-500/10 text-violet-200" : "bg-amber-500/10 text-amber-200"
-                  }`}>
+                  <div className={"rounded-full px-2 py-1 text-xs font-semibold " + (tone === "emerald" ? "bg-emerald-500/10 text-emerald-200" : tone === "cyan" ? "bg-cyan-500/10 text-cyan-200" : tone === "violet" ? "bg-violet-500/10 text-violet-200" : "bg-amber-500/10 text-amber-200")}>
                     {change}
                   </div>
                 </div>
@@ -270,7 +252,7 @@ export default function Admin() {
 
               <div className="flex h-52 items-end gap-3">
                 {chartBars.map((height, index) => (
-                  <div key={index} className="flex-1 rounded-t-2xl bg-gradient-to-t from-emerald-500 via-emerald-400 to-cyan-400" style={{ height: `${height}%` }} />
+                  <div key={index} className="flex-1 rounded-t-2xl bg-gradient-to-t from-emerald-500 via-emerald-400 to-cyan-400" style={{ height: height + "%" }} />
                 ))}
               </div>
             </div>
@@ -278,30 +260,25 @@ export default function Admin() {
             <div className="glass-card rounded-[2rem] p-5">
               <div className="mb-5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-slate-400">Live feed</div>
-                  <h2 className="text-xl font-bold text-white">Recent activity</h2>
+                  <div className="text-sm text-slate-400">Sales funnel</div>
+                  <h2 className="text-xl font-bold text-white">Pipeline</h2>
                 </div>
                 <BriefcaseBusiness size={18} className="text-emerald-300" />
               </div>
 
               <div className="space-y-4">
-                {orders.slice(0, 3).map((order) => (
-                  <div key={order.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                {pipeline.map((stage) => (
+                  <div key={stage.stage} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-semibold text-white">{order.plan}</div>
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{order.status}</div>
+                      <div className="text-sm font-semibold text-white">{stage.stage}</div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{stage.amount}</div>
                     </div>
-                    <div className="mt-1 text-sm text-slate-400">{order.email} · {order.amount}</div>
-                  </div>
-                ))}
-
-                {consultations.slice(0, 2).map((consultation) => (
-                  <div key={consultation.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-semibold text-white">Consultation</div>
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{consultation.status}</div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="text-xl font-black text-white">{stage.count}</div>
+                      <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-800">
+                        <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: Math.min(stage.count * 10, 100) + "%" }} />
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm text-slate-400">{consultation.name} · {consultation.preferred_day} {consultation.preferred_time}</div>
                   </div>
                 ))}
               </div>
@@ -320,7 +297,7 @@ export default function Admin() {
 
               <div className="space-y-3">
                 {leads.map(({ name, service, status, value }) => (
-                  <div key={name} className="flex items-center justify-between rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                  <div key={name + "-" + service} className="flex items-center justify-between rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
                     <div>
                       <div className="font-semibold text-white">{name}</div>
                       <div className="text-xs text-slate-400">{service}</div>
@@ -380,6 +357,50 @@ export default function Admin() {
 
               <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/8 p-4 text-sm leading-7 text-slate-200">
                 {aiResult}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">Orders</div>
+                  <h2 className="text-xl font-bold text-white">Recent purchases</h2>
+                </div>
+                <Package size={18} className="text-emerald-300" />
+              </div>
+              <div className="space-y-3">
+                {orders.length ? orders.map((order) => (
+                  <div key={order.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="font-semibold text-white">{order.plan}</div>
+                      <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{order.status || "new"}</span>
+                    </div>
+                    <div className="mt-1 text-sm text-slate-400">{order.email} · {order.amount}</div>
+                  </div>
+                )) : <div className="text-sm text-slate-400">No orders yet.</div>}
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">Consultations</div>
+                  <h2 className="text-xl font-bold text-white">Booked sessions</h2>
+                </div>
+                <MessageSquareText size={18} className="text-emerald-300" />
+              </div>
+              <div className="space-y-3">
+                {consultations.length ? consultations.map((consultation) => (
+                  <div key={consultation.id} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="font-semibold text-white">{consultation.name}</div>
+                      <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{consultation.status || "pending"}</span>
+                    </div>
+                    <div className="mt-1 text-sm text-slate-400">{consultation.preferred_day} · {consultation.preferred_time}</div>
+                  </div>
+                )) : <div className="text-sm text-slate-400">No consultations yet.</div>}
               </div>
             </div>
           </div>

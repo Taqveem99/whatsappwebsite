@@ -20,7 +20,7 @@ export default function Navbar() {
           <Link to="/book" className="transition hover:text-white">Consultation</Link>
           <Link to={hasSession ? "/admin" : "/login"} className="transition hover:text-white">Admin</Link>
           <a href="https://wa.me/923018570942" target="_blank" rel="noreferrer" className="transition hover:text-white">
-            WhatsApp
+            WhatsApp: +92 301 8570942
           </a>
         </div>
 

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import crypto from "node:crypto";
 import Database from "better-sqlite3";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 import OpenAI from "openai";
 
 dotenv.config();
@@ -17,6 +18,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, "dist");
 const dataDir = path.join(__dirname, "data");
+const appConfig = {
+  brandName: "HM Studios",
+  supportEmail: process.env.SUPPORT_EMAIL || "taqveemhacker@gmail.com",
+  backupEmail: process.env.BACKUP_EMAIL || "taqveemulhaq97@gmail.com",
+  whatsappNumber: process.env.WHATSAPP_NUMBER || "923018570942",
+  defaultAdminEmail: process.env.DEFAULT_ADMIN_EMAIL || "taqveemhacker@gmail.com",
+  defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || "Admin@12345",
+  gmailUser: process.env.GMAIL_USER || "taqveemhacker@gmail.com",
+  gmailAppPassword: process.env.GMAIL_APP_PASSWORD || "",
+};
 
 fs.mkdirSync(dataDir, { recursive: true });
 const dbPath = path.join(dataDir, "hm-studios.db");
@@ -57,6 +68,43 @@ const createOpenAIClient = () => {
 };
 
 const aiClient = createOpenAIClient();
+
+const createEmailTransporter = () => {
+  const { gmailUser, gmailAppPassword } = appConfig;
+  if (!gmailUser || !gmailAppPassword) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: gmailUser,
+      pass: gmailAppPassword,
+    },
+  });
+};
+
+const emailTransporter = createEmailTransporter();
+
+const sendAdminNotification = async ({ subject, text, html }) => {
+  if (!emailTransporter) {
+    return { ok: false, reason: "SMTP not configured" };
+  }
+
+  try {
+    const to = [appConfig.supportEmail, appConfig.backupEmail].filter(Boolean).join(", ");
+    await emailTransporter.sendMail({
+      from: `HM Studios <${appConfig.gmailUser}>`,
+      to,
+      subject,
+      text,
+      html: html || `<p>${text}</p>`,
+    });
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: error.message };
+  }
+};
 
 const seedDatabase = () => {
   db.exec(`
@@ -109,12 +157,23 @@ const seedDatabase = () => {
     );
   `);
 
-  const adminExists = db.prepare("SELECT 1 FROM users WHERE email = ?").get("admin@hmstudios.tech");
-  if (!adminExists) {
-    const passwordHash = bcrypt.hashSync("admin123", 10);
-    db.prepare(
-      "INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, ?)",
-    ).run(crypto.randomUUID(), "admin@hmstudios.tech", passwordHash, "admin");
+  const adminEmails = [
+    appConfig.defaultAdminEmail,
+    "taqveemulhaq97@gmail.com",
+    "admin@hmstudios.tech",
+  ];
+
+  for (const email of adminEmails) {
+    const adminExists = db.prepare("SELECT 1 FROM users WHERE email = ?").get(email);
+    if (!adminExists) {
+      const passwordHash = bcrypt.hashSync(
+        email === "admin@hmstudios.tech" ? "admin123" : appConfig.defaultAdminPassword,
+        10,
+      );
+      db.prepare(
+        "INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, ?)",
+      ).run(crypto.randomUUID(), email, passwordHash, "admin");
+    }
   }
 };
 
@@ -146,6 +205,23 @@ app.get("/api/health", (req, res) => {
     provider: aiClient ? "openai" : "fallback",
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
     database: "sqlite",
+    emailReady: Boolean(emailTransporter),
+    app: {
+      ...appConfig,
+      gmailAppPassword: appConfig.gmailAppPassword ? "configured" : "missing",
+    },
+  });
+});
+
+app.get("/api/public/config", (req, res) => {
+  res.json({
+    brandName: appConfig.brandName,
+    supportEmail: appConfig.supportEmail,
+    backupEmail: appConfig.backupEmail,
+    whatsappNumber: appConfig.whatsappNumber,
+    whatsappLink: `https://wa.me/${appConfig.whatsappNumber}`,
+    adminEmail: appConfig.defaultAdminEmail,
+    emailReady: Boolean(emailTransporter),
   });
 });
 
@@ -202,6 +278,39 @@ app.get("/api/admin/summary", requireAuth, (req, res) => {
       { label: "Consultations", value: String(consultations.count || 0), change: "+8.4%", tone: "violet" },
       { label: "Leads", value: String(leads.count || 0), change: "+24.6%", tone: "amber" },
     ],
+    pipeline: [
+      { name: "Discovery", value: 16 },
+      { name: "Qualified", value: 9 },
+      { name: "Booked", value: 6 },
+      { name: "Closed", value: 4 },
+    ],
+    emailReady: Boolean(emailTransporter),
+  });
+});
+
+app.get("/api/admin/overview", requireAuth, async (req, res) => {
+  const summary = db.prepare("SELECT COUNT(*) as total_leads, SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new_leads FROM leads").get();
+  const orders = db.prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5").all();
+  const consultations = db.prepare("SELECT * FROM consultations ORDER BY created_at DESC LIMIT 5").all();
+  const leads = db.prepare("SELECT * FROM leads ORDER BY created_at DESC LIMIT 5").all();
+
+  res.json({
+    stats: [
+      { label: "Pipeline", value: "21", change: "+7.2%", tone: "emerald" },
+      { label: "Scheduled", value: String(consultations.length), change: "+5.1%", tone: "cyan" },
+      { label: "New leads", value: String(summary.new_leads || 0), change: "+11.4%", tone: "violet" },
+      { label: "Win rate", value: "38%", change: "+3.7%", tone: "amber" },
+    ],
+    pipeline: [
+      { stage: "Lead capture", count: 18, amount: "$2.4K" },
+      { stage: "Qualification", count: 11, amount: "$3.7K" },
+      { stage: "Consultation", count: 7, amount: "$5.3K" },
+      { stage: "Closed", count: 4, amount: "$8.2K" },
+    ],
+    leads,
+    orders,
+    consultations,
+    emailReady: Boolean(emailTransporter),
   });
 });
 
@@ -220,7 +329,7 @@ app.get("/api/admin/leads", requireAuth, (req, res) => {
   res.json({ leads: rows });
 });
 
-app.post("/api/admin/leads", requireAuth, (req, res) => {
+app.post("/api/admin/leads", requireAuth, async (req, res) => {
   const { name, email, source, note } = req.body || {};
   if (!name || !email || !source) {
     return res.status(400).json({ error: "Name, email, and source are required." });
@@ -230,6 +339,11 @@ app.post("/api/admin/leads", requireAuth, (req, res) => {
   db.prepare(
     "INSERT INTO leads (id, name, email, source, note, status) VALUES (?, ?, ?, ?, ?, ?)",
   ).run(id, String(name), String(email), String(source), String(note || ""), "new");
+
+  await sendAdminNotification({
+    subject: `New HM Studios lead: ${name}`,
+    text: `New lead from ${source}: ${name} (${email})\nNotes: ${note || "No extra notes"}`,
+  });
 
   res.status(201).json({ success: true, id });
 });
@@ -270,7 +384,7 @@ app.post("/api/ai/generate", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/api/orders", (req, res) => {
+app.post("/api/orders", async (req, res) => {
   const { plan, email, paymentMethod, transactionId, amount } = req.body || {};
   if (!plan || !email || !transactionId) {
     return res.status(400).json({ error: "Plan, email, and transaction ID are required." });
@@ -281,10 +395,15 @@ app.post("/api/orders", (req, res) => {
     "INSERT INTO orders (id, plan, email, payment_method, transaction_id, amount) VALUES (?, ?, ?, ?, ?, ?)",
   ).run(id, String(plan), String(email), String(paymentMethod || "EasyPaisa"), String(transactionId), String(amount || "$0"));
 
+  await sendAdminNotification({
+    subject: `New HM Studios order: ${plan}`,
+    text: `Customer: ${email}\nPlan: ${plan}\nPayment method: ${paymentMethod || "EasyPaisa"}\nTransaction ID: ${transactionId}\nAmount: ${amount || "$0"}`,
+  });
+
   res.status(201).json({ success: true, id });
 });
 
-app.post("/api/consultations", (req, res) => {
+app.post("/api/consultations", async (req, res) => {
   const { name, email, day, time, transactionId } = req.body || {};
   if (!name || !email || !day || !time || !transactionId) {
     return res.status(400).json({ error: "All consultation fields are required." });
@@ -295,7 +414,30 @@ app.post("/api/consultations", (req, res) => {
     "INSERT INTO consultations (id, name, email, preferred_day, preferred_time, transaction_id) VALUES (?, ?, ?, ?, ?, ?)",
   ).run(id, String(name), String(email), String(day), String(time), String(transactionId));
 
+  await sendAdminNotification({
+    subject: `New HM Studios consultation: ${name}`,
+    text: `Consultation request from ${name} (${email})\nPreferred day: ${day}\nPreferred time: ${time}\nTransaction ID: ${transactionId}`,
+  });
+
   res.status(201).json({ success: true, id });
+});
+
+app.post("/api/contact/send", async (req, res) => {
+  const { name, email, subject, message } = req.body || {};
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "Name, email, and message are required." });
+  }
+
+  const result = await sendAdminNotification({
+    subject: subject || `Website enquiry from ${name}`,
+    text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject || "General enquiry"}\nMessage: ${message}`,
+  });
+
+  if (!result.ok) {
+    return res.status(500).json({ error: result.reason || "Unable to send email" });
+  }
+
+  res.json({ success: true, message: "Message delivered to HM Studios" });
 });
 
 if (fs.existsSync(distDir)) {

@@ -37,7 +37,8 @@ export default function Footer() {
                 {label}
               </a>
             ))}
-            <a href="mailto:hmstudios.tech@gmail.com" className="block hover:text-white">hmstudios.tech@gmail.com</a>
+            <a href="mailto:taqveemhacker@gmail.com" className="block hover:text-white">taqveemhacker@gmail.com</a>
+            <a href="mailto:taqveemulhaq97@gmail.com" className="block hover:text-white">taqveemulhaq97@gmail.com</a>
             <a href="https://wa.me/923018570942" target="_blank" rel="noreferrer" className="block hover:text-white">WhatsApp: +92 301 8570942</a>
           </div>
         </div>

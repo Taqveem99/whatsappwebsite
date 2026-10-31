@@ -115,11 +115,14 @@ export default function Home() {
               <h3 className="text-3xl font-bold text-white">Connect directly with HM Studios.</h3>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a href="https://wa.me/923324171101" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400 hover:text-slate-950">
-                <MessageSquareText size={16} /> WhatsApp
+              <a href="https://wa.me/923018570942" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-400 hover:text-slate-950">
+                <MessageSquareText size={16} /> WhatsApp +92 301 8570942
               </a>
-              <a href="mailto:hmstudios.tech@gmail.com" className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-white transition hover:border-slate-500">
-                <Mail size={16} /> Email
+              <a href="mailto:taqveemhacker@gmail.com" className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-white transition hover:border-slate-500">
+                <Mail size={16} /> taqveemhacker@gmail.com
+              </a>
+              <a href="mailto:taqveemulhaq97@gmail.com" className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-white transition hover:border-slate-500">
+                <Mail size={16} /> taqveemulhaq97@gmail.com
               </a>
             </div>
           </div>

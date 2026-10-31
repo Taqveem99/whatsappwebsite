@@ -4,7 +4,7 @@ import { ArrowRight, LockKeyhole } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "admin@hmstudios.tech", password: "admin123" });
+  const [form, setForm] = useState({ email: "taqveemhacker@gmail.com", password: "Admin@12345" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -89,7 +89,7 @@ export default function Login() {
           </form>
 
           <div className="mt-8 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 text-xs text-slate-400">
-            Demo credentials: admin@hmstudios.tech / admin123
+            Advanced admin access: taqveemhacker@gmail.com / Admin@12345
           </div>
         </div>
       </div>
