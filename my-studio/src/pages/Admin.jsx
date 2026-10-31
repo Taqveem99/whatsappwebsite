@@ -1,0 +1,285 @@
+import { useMemo, useState } from "react";
+import {
+  BarChart3,
+  Bell,
+  BrainCircuit,
+  BriefcaseBusiness,
+  LayoutDashboard,
+  MessageSquareText,
+  Package,
+  Search,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Wand2,
+} from "lucide-react";
+
+const stats = [
+  { label: "Revenue", value: "$18.4K", change: "+12.8%", tone: "emerald" },
+  { label: "Orders", value: "312", change: "+19.3%", tone: "cyan" },
+  { label: "Consultations", value: "48", change: "+8.4%", tone: "violet" },
+  { label: "Recovery Cases", value: "116", change: "+24.6%", tone: "amber" },
+];
+
+const leads = [
+  { name: "Sara Ali", service: "Deep Recovery", status: "Follow-up", value: "$59" },
+  { name: "Omer Khan", service: "Enterprise", status: "Paid", value: "$149" },
+  { name: "Hina Noor", service: "Consultation", status: "Booked", value: "$11" },
+  { name: "Ayesha W", service: "Standard", status: "Review", value: "$9" },
+];
+
+const templates = [
+  "Draft a customer reply for a WhatsApp order confirmation",
+  "Write a premium product description for HM DeepScan",
+  "Summarize the key support issues in this week",
+  "Generate a short promo message for the 90-day recovery package",
+];
+
+const activity = [
+  { label: "Order confirmed", detail: "User bought Deep Sector Extraction", time: "8 min ago" },
+  { label: "Consultation booked", detail: "Saturday - 6:00 PM slot", time: "14 min ago" },
+  { label: "Support message", detail: "Customer asked about Crypt14 recovery", time: "31 min ago" },
+  { label: "New lead", detail: "Instagram inquiry: Android data recovery", time: "1 hr ago" },
+];
+
+const chartBars = [46, 62, 58, 82, 70, 94, 88, 100, 92, 86, 98, 75];
+
+function buildAiReply(prompt) {
+  const lower = prompt.toLowerCase();
+
+  if (lower.includes("product") || lower.includes("description")) {
+    return "HM DeepScan v1.0 is a premium Android and WhatsApp forensic recovery suite engineered for deleted media restoration, Crypt14 decryption, and EXIF metadata extraction. It is built for privacy-first recovery workflows and offline evidence handling.";
+  }
+
+  if (lower.includes("reply") || lower.includes("whatsapp") || lower.includes("message")) {
+    return "Hi! Thanks for your interest in HM Studios. I’ve confirmed your package request and will send the next steps, payment details, and delivery instructions in the next message. You can also book a private consultation if you need guidance.";
+  }
+
+  if (lower.includes("support") || lower.includes("issue") || lower.includes("summary")) {
+    return "Top issues this week: data recovery delays, WhatsApp media loss, and license delivery confirmation. Recommended actions: improve onboarding, answer FAQs, and collect transaction IDs before support responses.";
+  }
+
+  if (lower.includes("promo") || lower.includes("sale") || lower.includes("marketing")) {
+    return "Launch a limited-time promotion for the Deep Sector Recovery plan and highlight its advanced WhatsApp decryption, deep carve capabilities, and VIP consultation access. Emphasize privacy, speed, and technical expertise.";
+  }
+
+  return "Here’s an AI-generated action plan: review the latest customer intake, confirm package viability, respond in the next 15 minutes, and add follow-up reminders for consultations and support tickets.";
+}
+
+export default function Admin() {
+  const [prompt, setPrompt] = useState("Write a short marketing message for the Deep Sector Recovery plan.");
+  const [aiResult, setAiResult] = useState(buildAiReply(prompt));
+
+  const sidebarItems = useMemo(
+    () => [
+      { label: "Overview", icon: LayoutDashboard, active: true },
+      { label: "Customers", icon: Users },
+      { label: "Orders", icon: Package },
+      { label: "AI Copilot", icon: BrainCircuit },
+      { label: "Inbox", icon: MessageSquareText },
+      { label: "Reports", icon: BarChart3 },
+      { label: "Settings", icon: Settings },
+    ],
+    [],
+  );
+
+  const handleAiGenerate = () => {
+    setAiResult(buildAiReply(prompt));
+  };
+
+  return (
+    <main className="mx-auto max-w-7xl px-6 pb-24 pt-12 text-slate-100 md:pt-16">
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="glass-card rounded-[2rem] p-5">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-400/30">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-[0.25em] text-slate-400">Admin</div>
+              <div className="font-bold text-white">HM Control</div>
+            </div>
+          </div>
+
+          <nav className="space-y-2">
+            {sidebarItems.map(({ label, icon: Icon, active }) => (
+              <button
+                key={label}
+                type="button"
+                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm transition ${
+                  active ? "bg-emerald-500/12 text-emerald-200 ring-1 ring-emerald-400/30" : "text-slate-300 hover:bg-slate-800/60"
+                }`}
+              >
+                <Icon size={17} />
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-8 rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
+              <Sparkles size={16} className="text-emerald-300" />
+              AI credits
+            </div>
+            <div className="text-3xl font-black text-white">1,280</div>
+            <div className="mt-2 text-xs text-slate-400">Available this month</div>
+          </div>
+        </aside>
+
+        <section className="space-y-6">
+          <header className="glass-card rounded-[2rem] p-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-xs uppercase tracking-[0.25em] text-slate-400">Dashboard</div>
+                <h1 className="mt-2 text-3xl font-black text-white">Business overview</h1>
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" className="rounded-full border border-slate-700 bg-slate-900/70 p-2.5 text-slate-300">
+                  <Search size={18} />
+                </button>
+                <button type="button" className="rounded-full border border-slate-700 bg-slate-900/70 p-2.5 text-slate-300">
+                  <Bell size={18} />
+                </button>
+                <button type="button" className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950">
+                  Launch AI
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {stats.map(({ label, value, change, tone }) => (
+              <div key={label} className="glass-card rounded-[1.7rem] p-5">
+                <div className="text-sm text-slate-400">{label}</div>
+                <div className="mt-5 flex items-end justify-between gap-4">
+                  <div className="text-3xl font-black text-white">{value}</div>
+                  <div className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                    tone === "emerald" ? "bg-emerald-500/10 text-emerald-200" :
+                    tone === "cyan" ? "bg-cyan-500/10 text-cyan-200" :
+                    tone === "violet" ? "bg-violet-500/10 text-violet-200" : "bg-amber-500/10 text-amber-200"
+                  }`}>
+                    {change}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">Performance</div>
+                  <h2 className="text-xl font-bold text-white">Monthly revenue</h2>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-emerald-200">
+                  <TrendingUp size={16} />
+                  +18.2%
+                </div>
+              </div>
+
+              <div className="flex h-52 items-end gap-3">
+                {chartBars.map((height, index) => (
+                  <div key={index} className="flex-1 rounded-t-2xl bg-gradient-to-t from-emerald-500 via-emerald-400 to-cyan-400" style={{ height: `${height}%` }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">Live feed</div>
+                  <h2 className="text-xl font-bold text-white">Recent activity</h2>
+                </div>
+                <BriefcaseBusiness size={18} className="text-emerald-300" />
+              </div>
+
+              <div className="space-y-4">
+                {activity.map(({ label, detail, time }) => (
+                  <div key={label} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-white">{label}</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{time}</div>
+                    </div>
+                    <div className="mt-1 text-sm text-slate-400">{detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">Leads</div>
+                  <h2 className="text-xl font-bold text-white">Recent customers</h2>
+                </div>
+                <button type="button" className="text-sm font-semibold text-emerald-200">View all</button>
+              </div>
+
+              <div className="space-y-3">
+                {leads.map(({ name, service, status, value }) => (
+                  <div key={name} className="flex items-center justify-between rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
+                    <div>
+                      <div className="font-semibold text-white">{name}</div>
+                      <div className="text-xs text-slate-400">{service}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-emerald-200">{value}</div>
+                      <div className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{status}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-400">AI Copilot</div>
+                  <h2 className="text-xl font-bold text-white">Smart content studio</h2>
+                </div>
+                <Wand2 size={18} className="text-emerald-300" />
+              </div>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                {templates.map((template) => (
+                  <button
+                    key={template}
+                    type="button"
+                    onClick={() => setPrompt(template)}
+                    className="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs text-slate-300 transition hover:border-emerald-400/30 hover:text-white"
+                  >
+                    {template}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={5}
+                className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 p-4 text-sm text-slate-100 outline-none transition focus:border-emerald-400"
+              />
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Private & local</div>
+                <button type="button" onClick={handleAiGenerate} className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950">
+                  <BrainCircuit size={16} />
+                  Generate
+                </button>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/8 p-4 text-sm leading-7 text-slate-200">
+                {aiResult}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

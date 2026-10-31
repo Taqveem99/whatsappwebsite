@@ -1,15 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-muted: #a1a1aa;
-  --color-card: #18181b;
-  --color-border: #27272a;
+  --color-background: #060816;
+  --color-foreground: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-card: rgba(15, 23, 42, 0.82);
+  --color-border: rgba(148, 163, 184, 0.2);
+  --color-emerald: #34d399;
+}
+
+:root {
+  font-family: Inter, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #f8fafc;
+  background: #060816;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: system-ui, sans-serif;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(6, 8, 22, 0.82), rgba(5, 10, 18, 0.88)),
+    url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;
+  color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(52, 211, 153, 0.35);
+  color: #dcfce7;
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.45);
+  backdrop-filter: blur(14px);
+}
+
+.cyan-ring {
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.27), 0 0 35px rgba(59, 130, 246, 0.18);
+}
+
+.grid-pattern {
+  background-image: linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.text-balance {
+  text-wrap: balance;
 }
