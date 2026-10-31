@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   Bell,
@@ -71,6 +71,15 @@ function buildAiReply(prompt) {
 export default function Admin() {
   const [prompt, setPrompt] = useState("Write a short marketing message for the Deep Sector Recovery plan.");
   const [aiResult, setAiResult] = useState(buildAiReply(prompt));
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [apiStatus, setApiStatus] = useState("checking");
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((res) => res.json())
+      .then((data) => setApiStatus(data.provider || "fallback"))
+      .catch(() => setApiStatus("fallback"));
+  }, []);
 
   const sidebarItems = useMemo(
     () => [
@@ -85,8 +94,24 @@ export default function Admin() {
     [],
   );
 
-  const handleAiGenerate = () => {
-    setAiResult(buildAiReply(prompt));
+  const handleAiGenerate = async () => {
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await response.json();
+      const text = data.text || buildAiReply(prompt);
+      setAiResult(text);
+    } catch (error) {
+      setAiResult(buildAiReply(prompt));
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -265,11 +290,18 @@ export default function Admin() {
                 className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 p-4 text-sm text-slate-100 outline-none transition focus:border-emerald-400"
               />
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Private & local</div>
-                <button type="button" onClick={handleAiGenerate} className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950">
+              <div className="mt-4 flex items-center justify-between gap-4">
+                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">
+                  {apiStatus === "openai" ? "AI connected" : "Fallback mode"}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAiGenerate}
+                  disabled={isGenerating}
+                  className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-70"
+                >
                   <BrainCircuit size={16} />
-                  Generate
+                  {isGenerating ? "Generating..." : "Generate"}
                 </button>
               </div>
 
