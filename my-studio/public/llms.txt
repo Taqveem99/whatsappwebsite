@@ -1,0 +1,9 @@
+# YourBrand
+> One-line description of what you do.
+
+## Pages
+- https://yourdomain.com/store: Product and pricing
+- https://yourdomain.com/book: Consultation booking
+
+## Contact
+- Email: you@example.com
